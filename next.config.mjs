@@ -4,8 +4,8 @@ const nextConfig = {
   images: {
     unoptimized: true, // Disable default image optimization
   },
-  assetPrefix: isProd ? '/projeto-ruboNegro/' : '',
-  basePath: isProd ? '/projeto-ruboNegro' : '',
+  assetPrefix: isProd ? '/rbtree-sim/' : '',
+  basePath: isProd ? '/rbtree-sim' : '',
   output: 'export',
   distDir: 'dist',
 };
