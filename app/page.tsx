@@ -1,6 +1,7 @@
 "use client"
 
 import { RedBlackTreeVisualizer, RedBlackTreeVisualizerHandle } from "@/components/red-black-tree-visualizer"
+import { Footer } from "@/components/footer"
 import { useEffect, useRef } from "react"
 import { useSearchParams } from "next/navigation"
 import { extractSearchParams } from "@/lib/extractSearchParams"
@@ -21,5 +22,12 @@ export default function Home() {
     }
   }, [searchParams])
 
-  return <RedBlackTreeVisualizer ref={ref} />
+  return (
+    <main className="min-h-screen flex flex-col">
+      <div className="flex-1 flex flex-col">
+        <RedBlackTreeVisualizer ref={ref} />
+      </div>
+      <Footer />
+    </main>
+  )
 }
