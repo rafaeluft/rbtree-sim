@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useRef } from "react"
 import { Card } from "@/components/ui/card"
 
 interface PseudocodeLine {
@@ -194,16 +195,35 @@ const algorithms = {
   }
 }
 
-export function PseudocodeDisplay({ 
-  algorithm, 
-  activeLines = [], 
-  executedLines = [], 
+export function PseudocodeDisplay({
+  algorithm,
+  activeLines = [],
+  executedLines = [],
   conditions = {},
   comments = {},
   showRotationAlgorithms = false
 }: PseudocodeDisplayProps) {
   const algorithmData = algorithms[algorithm]
-  
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (
+      algorithm === 'insert-fixup' &&
+      activeLines.length === 1 &&
+      activeLines[0] === 30 &&
+      scrollContainerRef.current
+    ) {
+      const LINE_HEIGHT = 22
+      const lineIndex = 29
+      const scrollTop = lineIndex * LINE_HEIGHT - 50
+
+      scrollContainerRef.current.scrollTo({
+        top: scrollTop,
+        behavior: 'smooth'
+      })
+    }
+  }, [algorithm, activeLines])
+
   const getLineStyle = (lineNumber: number) => {
     if (activeLines.includes(lineNumber)) {
       return "bg-green-100 border-green-500 text-green-900"
@@ -330,7 +350,7 @@ export function PseudocodeDisplay({
         <h3 className="font-semibold text-base mb-2">{algorithmData.title}</h3>
       </div>
       
-      <div className="flex-1 overflow-y-auto">
+      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
         <div className="space-y-1">
           {renderAlgorithm(algorithm, algorithmData.title, algorithmData.lines)}
           

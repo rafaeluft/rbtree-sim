@@ -208,144 +208,6 @@ export function PresentationMode({
 
   const currentStepData = steps[currentStep] || null;
 
-  const getAlgorithmForStep = (stepType: string, stepData: any) => {
-    const rootOp = stepData?.meta?.rootOp;
-    switch (stepType) {
-      case "insert":
-        return "insert";
-      case "recolor":
-      case "rotate-left":
-      case "rotate-right":
-        return rootOp === "delete" ? "delete-fixup" : "insert-fixup";
-      case "delete":
-        return "delete";
-      default:
-        return "insert";
-    }
-  };
-
-  const getActiveLinesForStep = (stepType: string, stepData: any) => {
-    switch (stepType) {
-      case "insert":
-        return [16, 17, 18, 19];
-      case "recolor":
-        if (stepData?.meta?.rootOp === "delete") {
-          const left = stepData?.meta?.isLeftChild === true;
-          if (left) {
-            if (stepData?.meta?.siblingColor === "RED") return [4, 5, 6, 7, 8];
-            if (stepData?.meta?.bothChildrenBlack) return [9, 10, 11];
-            if (stepData?.meta?.rightChildBlack) return [13, 14, 15, 16, 17];
-            return [18, 19, 20, 21, 22];
-          } else {
-            if (stepData?.meta?.siblingColor === "RED")
-              return [25, 26, 27, 28, 29];
-            if (stepData?.meta?.bothChildrenBlack) return [30, 31, 32];
-            if (stepData?.meta?.leftChildBlack) return [34, 35, 36, 37, 38];
-            return [39, 40, 41, 42, 43];
-          }
-        }
-        if (stepData?.meta?.case === "uncle-red") {
-          return [4, 5, 6, 7, 8];
-        }
-        if (stepData?.meta?.case === "triangle") {
-          return stepData?.meta?.parentSide === "left" ? [10, 11] : [24, 25];
-        }
-        if (stepData?.meta?.case === "line") {
-          return stepData?.meta?.parentSide === "left"
-            ? [13, 14, 15]
-            : [27, 28, 29];
-        }
-        return [4, 5, 6, 7, 8];
-      case "rotate-left":
-        if (stepData?.meta?.rootOp === "delete") {
-          const left = stepData?.meta?.isLeftChild === true;
-          return left ? [21] : [42];
-        }
-        return [10, 11, 12];
-      case "rotate-right":
-        if (stepData?.meta?.rootOp === "delete") {
-          const left = stepData?.meta?.isLeftChild === true;
-          return left ? [16] : [28];
-        }
-        return [13, 14, 15];
-      case "delete":
-        if (
-          stepData?.hasLeftChild === false &&
-          stepData?.hasRightChild === false
-        ) {
-          return [3, 4, 5];
-        } else if (
-          stepData?.hasLeftChild === false ||
-          stepData?.hasRightChild === false
-        ) {
-          return [6, 7, 8];
-        } else {
-          return [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22];
-        }
-      default:
-        return [];
-    }
-  };
-
-  const getExecutedLinesForStep = (stepType: string, stepData: any) => {
-    switch (stepType) {
-      case "insert":
-        return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
-      case "recolor":
-        return [1, 2, 3];
-      case "rotate-left":
-        return [1, 2, 3, 9];
-      case "rotate-right":
-        return [1, 2, 3, 9, 10, 11, 12];
-      case "delete":
-        return [1, 2];
-      default:
-        return [];
-    }
-  };
-
-  const getConditionsForStep = (stepType: string, stepData: any) => {
-    const conditions: { [key: number]: boolean } = {};
-
-    switch (stepType) {
-      case "insert":
-        conditions[3] = true;
-        conditions[5] = stepData?.direction === "left";
-        conditions[9] = stepData?.isRoot || false;
-        conditions[11] = stepData?.direction === "left";
-        break;
-      case "recolor":
-        conditions[1] = true;
-        conditions[2] = stepData?.parentSide === "left";
-        conditions[4] = true;
-        break;
-      case "rotate-left":
-        conditions[1] = true;
-        conditions[2] = stepData?.parentSide === "left";
-        conditions[4] = false;
-        conditions[10] = true;
-        break;
-      case "rotate-right":
-        conditions[1] = true;
-        conditions[2] = stepData?.parentSide === "left";
-        conditions[4] = false;
-        conditions[10] = false;
-        break;
-      case "delete":
-        conditions[3] = stepData?.hasLeftChild === false;
-        conditions[6] = stepData?.hasRightChild === false;
-        conditions[12] = !(stepData?.isSuccessorChild || false);
-        conditions[21] = stepData?.originalColor === "BLACK";
-        break;
-    }
-
-    return conditions;
-  };
-
-  const getCommentsForStep = (stepType: string, stepData: any) => {
-    return {};
-  };
-
   const getStepTypeColor = (type: string) => {
     switch (type) {
       case "insert":
@@ -408,31 +270,14 @@ export function PresentationMode({
           <div className="w-96 space-y-4">
             {currentStepData ? (
               <PseudocodeDisplay
-                algorithm={
-                  getAlgorithmForStep(
-                    currentStepData.type,
-                    currentStepData
-                  ) as any
-                }
-                activeLines={getActiveLinesForStep(
-                  currentStepData.type,
-                  currentStepData
-                )}
-                executedLines={getExecutedLinesForStep(
-                  currentStepData.type,
-                  currentStepData
-                )}
-                conditions={getConditionsForStep(
-                  currentStepData.type,
-                  currentStepData
-                )}
-                comments={getCommentsForStep(
-                  currentStepData.type,
-                  currentStepData
-                )}
+                algorithm={currentStepData.algorithm}
+                activeLines={currentStepData.activeLines || []}
+                executedLines={currentStepData.executedLines || []}
+                conditions={currentStepData.conditions || {}}
+                comments={{}}
                 showRotationAlgorithms={
-                  currentStepData.type === "rotate-left" ||
-                  currentStepData.type === "rotate-right"
+                  currentStepData.algorithm === "left-rotate" ||
+                  currentStepData.algorithm === "right-rotate"
                 }
               />
             ) : (
